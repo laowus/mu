@@ -30,5 +30,10 @@ export const usePlaylistSquareStore = defineStore("playlistSquare", {
     currentPlatformCategories() {
       return this.getCategories("qq");
     },
+    updateCurrentCategoryItem(data, row, col) {
+      this.currentCategoryItem.data = data;
+      this.currentCategoryItem.row = row;
+      this.currentCategoryItem.col = col;
+    },
   },
 });
