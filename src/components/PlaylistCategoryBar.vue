@@ -2,13 +2,9 @@
 import { reactive } from "vue";
 import EventBus from "../common/EventBus.js";
 
-const props = defineProps({
-  data: Array,
-  loading: Boolean,
-});
+const props = defineProps({ data: Array, loading: Boolean });
 
 const flatData = reactive([]);
-
 const getFlatData = () => {
   // 清空之前的数据
   flatData.length = 0;
