@@ -52,6 +52,7 @@ export class Player {
       html5: true,
       autoplay: false,
       preload: false,
+      crossOrigin: "anonymous",
       onplay: function () {
         this.retry = 0;
         requestAnimationFrame(self.__step.bind(self));
@@ -113,7 +114,7 @@ export class Player {
   }
 
   setCurrent(track) {
-    console.log("setCurrent", track )
+    console.log("setCurrent", track);
     this.stop();
     this.currentTrack = track;
     this.createSound();
@@ -192,11 +193,16 @@ export class Player {
   }
 
   tryUnlockHowlAudios() {
-    const audios = Howler._html5AudioPool;
-    // Unlock CORS
-    audios.forEach((audio) => {
-      audio.crossOrigin = "anonymous";
-    });
+    try {
+      const audios = Howler._html5AudioPool;
+      if (Array.isArray(audios)) {
+        audios.forEach((audio) => {
+          if (audio) audio.crossOrigin = "anonymous";
+        });
+      }
+    } catch (error) {
+      console.warn("Failed to unlock Howl audios:", error);
+    }
   }
 
   updateEQ(values) {

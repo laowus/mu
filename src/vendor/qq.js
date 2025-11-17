@@ -39,6 +39,77 @@ const getAlbumCover = (albummid) => {
   return "https://y.qq.com/music/photo_new/T002R500x500M000" + albummid + ".jpg?max_age=2592000";
 };
 
+const getTrackTypeMeta = (typeName) => {
+  return {
+    m4a: {
+      prefix: "C400",
+      ext: ".m4a",
+    },
+    128: {
+      prefix: "M500",
+      ext: ".mp3",
+    },
+    320: {
+      prefix: "M800",
+      ext: ".mp3",
+    },
+    ape: {
+      prefix: "A000",
+      ext: ".ape",
+    },
+    flac: {
+      prefix: "F000",
+      ext: ".flac",
+    },
+  }[typeName];
+};
+
+const vkeyReqData = (trackInfo) => {
+  //TODO
+  const mediaId = trackInfo.mid;
+  const songtype = [trackInfo.type];
+  const filename = ["m4a"].map((typeName) => {
+    const typeMeta = getTrackTypeMeta(typeName);
+    return typeMeta.prefix + mediaId + mediaId + typeMeta.ext;
+  });
+
+  const guid = (Math.random() * 10000000).toFixed(0);
+  const uin = "0";
+  return {
+    comm: {
+      uin,
+      format: "json",
+      ct: 24,
+      cv: 0,
+    },
+    req_1: moduleReq("vkey.GetVkeyServer", "CgiGetVkey", {
+      filename,
+      guid,
+      songmid: [mediaId],
+      songtype,
+      uin,
+      loginflag: 1,
+      platform: "20",
+    }),
+  };
+};
+
+const vkeyReqBody = (trackInfo) => {
+  return {
+    "-": "getplaysongvkey",
+    g_tk: 5381,
+    loginUin: 0,
+    hostUin: 0,
+    format: "json",
+    inCharset: "utf8",
+    outCharset: "utf8",
+    notice: 1,
+    platform: "yqq.json",
+    needNewCode: 0,
+    data: JSON.stringify(vkeyReqData(trackInfo)),
+  };
+};
+
 /**
  * QQ音乐平台相关功能类
  * 用于处理QQ音乐的分类获取和其他平台特定操作
@@ -251,6 +322,47 @@ export class QQ {
           result.addTrack(track);
         });
         resolve(result);
+      });
+    });
+  }
+
+  //歌曲播放详情：url、cover、lyric等
+  static playDetail(id, track) {
+    return new Promise((resolve, reject) => {
+      let url = "http://u.y.qq.com/cgi-bin/musicu.fcg";
+      const reqBody = {
+        format: "json",
+        data: JSON.stringify({
+          songinfo: moduleReq("music.pf_song_detail_svr", "get_song_detail_yqq", {
+            song_mid: id,
+          }),
+        }),
+      };
+      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+        const json = typeof res === "string" ? JSON.parse(res) : res;
+        const trackInfo = json.songinfo.data.track_info;
+        QQ.getVKeyJson(trackInfo).then((json) => {
+          const data = json.req_1.data;
+          const urlInfo = data.midurlinfo[0];
+          const vkey = urlInfo.vkey.trim();
+          const result = new Track(id, QQ.CODE);
+          if (vkey.length > 0) {
+            result.url = data.sip[0] + urlInfo.purl;
+          }
+          resolve(result);
+        });
+      });
+    });
+  }
+
+  //获取VKey、purl和sip服务器等信息
+  static getVKeyJson(trackInfo) {
+    return new Promise((resolve, reject) => {
+      let url = "https://u.y.qq.com/cgi-bin/musicu.fcg";
+      const reqBody = vkeyReqBody(trackInfo);
+      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+        const json = typeof res === "string" ? JSON.parse(res) : res;
+        resolve(json);
       });
     });
   }

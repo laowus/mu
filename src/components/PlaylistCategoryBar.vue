@@ -69,8 +69,7 @@ const getFlatData = () => {
       });
     });
   }
-  // 调试日志
-  console.log("flatData:", flatData);
+
   return flatData;
 };
 

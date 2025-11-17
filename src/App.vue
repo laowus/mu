@@ -1,11 +1,14 @@
 <script setup>
 import AppContent from "./AppContent.vue";
+import PlayerBoostrap from "./PlayerBoostrap.vue";
 import AppRoute from "./AppRoute.vue";
 </script>
 
 <template>
   <AppRoute>
-    <AppContent></AppContent>
+    <PlayerBoostrap>
+      <AppContent></AppContent>
+    </PlayerBoostrap>
   </AppRoute>
 </template>
 <style>

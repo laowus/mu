@@ -4,6 +4,7 @@ mod setup;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![http_client::http_get_json,])
         .setup(setup::setup_app)
         .run(tauri::generate_context!())

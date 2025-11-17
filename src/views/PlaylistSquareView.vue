@@ -79,7 +79,6 @@ const loadCategories = async () => {
 
     // 提取返回结果中的数据部分
     cachedCates = result.data;
-    console.log("cachedCates:", cachedCates);
 
     // 数据部分不存在则直接返回
     if (!cachedCates) return;

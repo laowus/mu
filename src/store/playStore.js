@@ -82,11 +82,12 @@ export const usePlayStore = defineStore("play", {
     },
     //直接播放，其他状态一概不管
     playTrackDirectly(track) {
+      console.log("playTrackDirectly", track);
       this.__resetPlayState();
       let playEventName = "track-play";
       if (!Track.hasUrl(track)) {
         //普通歌曲
-        console.log("!Track.hasUrl(track)")
+        console.log("!Track.hasUrl(track)");
         playEventName = "track-changed";
       }
       EventBus.emit(playEventName, track);
@@ -116,6 +117,10 @@ export const usePlayStore = defineStore("play", {
     updateVolumeByOffset(value) {
       value = parseFloat(value);
       this.updateVolume(this.volume + value);
+    },
+
+    setAutoPlaying(value) {
+      this.isAutoPlaying = value;
     },
   },
 });
