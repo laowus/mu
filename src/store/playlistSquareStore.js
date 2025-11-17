@@ -16,7 +16,15 @@ export const usePlaylistSquareStore = defineStore("playlistSquare", {
       index: 0,
     },
   }),
-  getters: {},
+  getters: {
+    currentPlatformCode(state) {
+      return "qq";
+    },
+    //获取当前平台的分类项
+    currentCategoryCode(state) {
+      return state.currentCategoryItem.data.value;
+    },
+  },
   actions: {
     putCategories(key, value) {
       this.categoriesMap.set(key, value);

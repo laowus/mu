@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia"; // Pinia状态管理中的storeToRefs函数
 import { reactive } from "vue"; // Vue的响应式API
 import EventBus from "../common/EventBus.js"; // 事件总线，用于组件间通信
 import { usePlaylistSquareStore } from "../store/playlistSquareStore"; // 导入播放列表广场的状态管理
+import CategoryBarLoadingMask from "./CategoryBarLoadingMask.vue";
 
 // 从store中解构出当前选中的分类项（响应式）
 const { currentCategoryItem } = storeToRefs(usePlaylistSquareStore());
@@ -106,11 +107,20 @@ EventBus.on("playlistCategory-update", () => {
     <!-- 仅在非加载状态下显示分类内容 -->
     <div v-show="!loading">
       <!-- 遍历扁平化后的分类数据 -->
+      <i class="iconfont icon-quanbu"></i>
       <template v-for="item in getFlatData()" v-show="data.length > 0">
         <!-- 使用v-html渲染分类项的key属性 -->
-        <span v-html="item.key"> </span>
+        <span
+          @click="visitCateItem(item, item.row, item.col)"
+          :class="{
+            active: item.row == currentCategoryItem.row && item.col == currentCategoryItem.col,
+          }"
+          v-html="item.key"
+        >
+        </span>
       </template>
     </div>
+    <CategoryBarLoadingMask :count="16" v-show="loading"></CategoryBarLoadingMask>
   </div>
 </template>
 
@@ -144,16 +154,16 @@ EventBus.on("playlistCategory-update", () => {
 }
 
 /* SVG图标的基本样式 */
-.playlist-category-bar svg {
-  fill: var(--svg-color);
+.playlist-category-bar i {
+  color: var(--svg-color);
   margin-right: 15px;
   cursor: pointer;
   transform: translateY(3px);
 }
 
 /* SVG图标悬停效果 */
-.playlist-category-bar svg:hover {
-  fill: var(--hl-color);
+.playlist-category-bar i:hover {
+  color: var(--hl-color);
 }
 
 /* 激活状态的分类项样式 */

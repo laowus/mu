@@ -1,8 +1,12 @@
 <script setup>
+import { storeToRefs } from "pinia";
 // 导入Vue相关的响应式API和生命周期钩子
 import { onMounted, reactive, ref } from "vue";
 // 导入播放列表分类栏组件
 import PlaylistCategoryBar from "../components/PlaylistCategoryBar.vue";
+// 导入播放列表控制组件
+import PlaylistsControl from "../components/PlaylistsControl.vue";
+
 // 导入QQ音乐API模块
 import { QQ } from "../vendor/qq.js";
 // 导入事件总线，用于组件间通信
@@ -12,11 +16,21 @@ import { usePlaylistSquareStore } from "../store/playlistSquareStore";
 
 // 从store中解构出获取当前平台分类和存储分类的方法
 const { currentPlatformCategories, putCategories } = usePlaylistSquareStore();
+const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore());
+
+const squareContentRef = ref(null);
+const back2TopBtnRef = ref(null);
 
 // 响应式数组，用于存储全部分类数据
 const categories = reactive([]);
+
+const playlists = reactive([]);
+const pagination = { offset: 0, limit: 35, page: 1 };
+let markScrollTop = 0;
+
 // 响应式引用，用于控制分类加载状态
 const isLoadingCategories = ref(true);
+const isLoadingContent = ref(true);
 
 /**
  * 设置分类加载状态
@@ -25,6 +39,21 @@ const isLoadingCategories = ref(true);
 const setLoadingCategories = (value) => {
   // 更新加载状态
   isLoadingCategories.value = value;
+};
+
+const setLoadingContent = (value) => {
+  isLoadingContent.value = value;
+};
+
+const resetPagination = () => {
+  playlists.length = 0;
+  pagination.offset = 0;
+  pagination.page = 1;
+};
+
+const resetScrollState = () => {
+  markScrollTop = 0;
+  if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop;
 };
 
 /**
@@ -74,12 +103,33 @@ onMounted(() => {
   loadCategories();
 });
 
+const resetCommom = () => {
+  resetPagination();
+  resetScrollState();
+};
+
+const loadContent = async (noLoadingMask) => {
+  if (!noLoadingMask) setLoadingContent(true);
+  //获取缓存的分类数据
+  const cate = currentCategoryCode.value;
+  const offset = pagination.offset;
+  const limit = pagination.limit;
+  const page = pagination.page;
+  const order = currentOrder.value.value;
+  const result = await QQ.square(cate, offset, limit, page, order);
+  if (!result) return;
+  if (currentPlatformCode.value != result.platform) return;
+  if (currentCategoryCode.value != result.cate) return;
+  playlists.push(...result.data);
+  setLoadingContent(false);
+};
 /**
  * 刷新内容的方法
  * 当收到刷新事件时执行
  */
 const refreshData = () => {
-  console.log("loadContent");
+  resetCommom();
+  loadContent();
 };
 
 // 监听播放列表刷新事件
@@ -88,10 +138,9 @@ EventBus.on("playlistSquare-refresh", refreshData);
 
 <template>
   <!-- 播放列表广场视图容器 -->
-  <div class="playlist-square-view">
-    <!-- 播放列表分类栏组件 -->
-    <!-- 传递分类数据和加载状态给子组件 -->
+  <div class="playlist-square-view" ref="squareContentRef">
     <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories"></PlaylistCategoryBar>
+    <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
   </div>
 </template>
 

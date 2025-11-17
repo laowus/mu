@@ -1,8 +1,32 @@
 <script setup>
-import PlaylistSquareView from "./views/PlaylistSquareView.vue";
+import AppContent from "./AppContent.vue";
+import AppRoute from "./AppRoute.vue";
 </script>
 
 <template>
-  <PlaylistSquareView></PlaylistSquareView>
+  <AppRoute>
+    <AppContent></AppContent>
+  </AppRoute>
 </template>
-<style></style>
+<style>
+html,
+body,
+#app {
+  background-color: var(--bg-color);
+  background: var(--app-bg);
+  background-position: center;
+  background-size: cover;
+  margin: 0px auto;
+  height: 100%;
+  font-size: var(--text-size);
+  color: var(--text-color);
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+}
+</style>

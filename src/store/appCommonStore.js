@@ -1,8 +1,14 @@
 import { defineStore } from "pinia";
-import EventBus from "../../common/EventBus";
+import EventBus from "../common/EventBus";
 
 export const useAppCommonStore = defineStore("appCommon", {
-  state: () => ({}),
+  state: () => ({
+    coverMaskShow: false,
+  }),
   getters: {},
-  actions: {},
+  actions: {
+    toggleCoverMask() {
+      this.coverMaskShow = !this.coverMaskShow;
+    },
+  },
 });
