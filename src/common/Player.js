@@ -27,11 +27,8 @@ export class Player {
   static initAndSetup() {
     const player = Player.get();
     return player
+      .on("track-play", (track) => player.playTrack(track))
       .on("suspend", () => player.pause())
-      .on("track-play", (track) => {
-        console.log("track-play", track);
-        player.playTrack(track);
-      })
       .on("track-restore", (track) => player.restore(track))
       .on("track-changed", () => {
         console.log("Player.js=> track-changed");

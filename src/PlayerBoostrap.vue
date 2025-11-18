@@ -49,11 +49,22 @@ const bootstrapTrack = (track) => {
 
 //歌单
 EventBus.on("playlist-play", ({ playlist, text, traceId }) => tryPlayPlaylist(playlist, text, traceId));
+//连跳计数器
+let autoSkipCnt = 0;
+//重置连跳计数
+const resetAutoSkip = () => (autoSkipCnt = 0);
 
+/* 记录最近播放 */
+//歌曲、电台
+
+EventBus.on("track-play", (track) => {
+  resetAutoSkip();
+});
 //普通歌曲
 // 加载歌曲
 EventBus.on("track-changed", (track) => {
   bootstrapTrack(track).then(
+    //获取
     (track) => {
       if (isCurrentTrack(track)) playTrackDirectly(track);
     },

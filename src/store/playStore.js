@@ -82,21 +82,25 @@ export const usePlayStore = defineStore("play", {
     },
     //直接播放，其他状态一概不管
     playTrackDirectly(track) {
-      console.log("playTrackDirectly", track);
+      // 开始去判断有没有url 没有就去获取url
+
       this.__resetPlayState();
       let playEventName = "track-play";
       if (!Track.hasUrl(track)) {
+        //去获取url
         playEventName = "track-changed";
       }
+      //第二次有了url 就直接播放
+      // player.on("track-play", track);
+      // 播放
       EventBus.emit(playEventName, track);
     },
+    //添加歌曲到播放队列, 并播放
     playTrack(track) {
-      console.log("playTrack", track);
-      //去列表中查找是否存在列表中
+      // 查找播放队列中是否存在该歌曲
       let index = this.findIndex(track);
-      // 没有找到, 则添加到播放队列中
       if (index == -1) {
-        //当前播放的下一首
+        //开始不存在, 则添加到播放队列中
         index = this.playingIndex + 1;
         // 从index 插入track
         this.queueTracks.splice(index, 0, track);
