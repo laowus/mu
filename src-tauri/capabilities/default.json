@@ -6,11 +6,31 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "fs:default",
     {
       "identifier": "http:default",
       "allow": [
         {
-          "url": "https://*.qq.com"
+          "url": "https://*.qq.com/**"
+        },
+        {
+          "url": "http://*.qq.com/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-cache-read",
+      "allow": [
+        {
+          "path": "$APPCACHE/**/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-cache-write",
+      "allow": [
+        {
+          "path": "$APPCACHE/**/*"
         }
       ]
     }

@@ -22,7 +22,6 @@
       "dangerousDisableAssetCspModification": false
     }
   },
-
   "bundle": {
     "active": true,
     "targets": "all",

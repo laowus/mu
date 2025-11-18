@@ -160,9 +160,6 @@ export class QQ {
           // 获取分类列表数据
           const list = json.data.categories;
 
-          // 打印分类列表到控制台（调试用）
-          console.table(list);
-
           // 遍历处理每个一级分类
           list.forEach((cate) => {
             // 获取分类组名称

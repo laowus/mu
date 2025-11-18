@@ -9,13 +9,6 @@ import { Lyric } from "./common/Lyric";
 const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore());
 const { setAutoPlaying, playTrackDirectly, isCurrentTrack } = usePlayStore();
 
-//设置歌词
-const assignLyric = (track, lyric) => {
-  if (lyric) {
-    Object.assign(track, { lyric: new Lyric(lyric) });
-  }
-};
-
 //处理无法播放的歌曲
 const handleUnplayableTrack = (track) => {
   console.log("无法播放的歌曲:", track);
@@ -58,9 +51,8 @@ const bootstrapTrack = (track) => {
 EventBus.on("playlist-play", ({ playlist, text, traceId }) => tryPlayPlaylist(playlist, text, traceId));
 
 //普通歌曲
+// 加载歌曲
 EventBus.on("track-changed", (track) => {
-  console.log("PlayerBoostrap => track-changed", track);
-  console.log("PlayerBoostrap 监听器已注册");
   bootstrapTrack(track).then(
     (track) => {
       if (isCurrentTrack(track)) playTrackDirectly(track);

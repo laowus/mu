@@ -33,13 +33,11 @@ pub async fn http_get_json(
     // 发送请求
     match request.send().await {
         Ok(response) => {
-            eprintln!("收到响应，状态码: {}", response.status());
             // 检查响应状态
             if response.status().is_success() {
                 // 使用text_with_charset确保中文正确显示
                 match response.text_with_charset("utf-8").await {
                     Ok(text) => {
-                        eprintln!("响应文本长度: {} 字符", text.len());
                         // 尝试将文本解析为JSON
                         match serde_json::from_str::<Value>(&text) {
                             Ok(json) => Ok(json),

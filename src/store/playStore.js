@@ -86,8 +86,6 @@ export const usePlayStore = defineStore("play", {
       this.__resetPlayState();
       let playEventName = "track-play";
       if (!Track.hasUrl(track)) {
-        //普通歌曲
-        console.log("!Track.hasUrl(track)");
         playEventName = "track-changed";
       }
       EventBus.emit(playEventName, track);
