@@ -1,18 +1,20 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useAppCommonStore } from "../store/appCommonStore";
 import { usePlayStore } from "../store/playStore.js";
 import { Track } from "../common/Track";
 import VolumeBar from "./VolumeBar.vue";
 import AudioTime from "./AudioTime.vue";
-const { coverMaskShow } = storeToRefs(useAppCommonStore());
-const { toggleCoverMask } = useAppCommonStore();
 
-const { currentTrack, mmssCurrentTime } = storeToRefs(usePlayStore());
 //歌曲信息 封面 歌手等..
 const props = defineProps({
   hideVolumeBar: Boolean,
 });
+const { coverMaskShow } = storeToRefs(useAppCommonStore());
+const { showPlayingView, toggleCoverMask } = useAppCommonStore();
+const { currentTrack, mmssCurrentTime, volume, playing } = storeToRefs(usePlayStore());
+
 const volumeBarRef = ref(null);
 
 const trackMeta = (track) => {

@@ -1,11 +1,24 @@
 <script setup>
 import { inject, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import EventBus from "../common/EventBus";
 import PlayMeta from "../components/PlayMeta.vue";
 import SearchBar from "../components/SearchBar.vue";
 import Navigator from "../components/Navigator.vue";
+import { usePlayStore } from "../store/playStore";
 
 const { visitUserHome, visitSetting } = inject("appRoute");
+const progressBarRef = ref(null);
+const { progress } = storeToRefs(usePlayStore());
+
+const seekTrack = (percent) => {
+  console.log("DefaultMainTop => seekTrack:", percent);
+  EventBus.emit("track-seek", percent);
+};
+
+watch(progress, (nv, ov) => {
+  progressBarRef.value.updateProgress(nv);
+});
 </script>
 <template>
   <div class="main-top">
@@ -25,6 +38,7 @@ const { visitUserHome, visitSetting } = inject("appRoute");
         <Navigator></Navigator>
       </div>
     </div>
+    <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
   </div>
 </template>
 
@@ -43,10 +57,6 @@ const { visitUserHome, visitSetting } = inject("appRoute");
 
 .main-top #play-nav #play-meta {
   width: 34.33%;
-}
-
-.f24px {
-  font-size: 24px !important;
 }
 
 .main-top #play-nav .play-ctl-wrap {
@@ -86,14 +96,14 @@ const { visitUserHome, visitSetting } = inject("appRoute");
   margin-right: 12px;
 }
 
-.main-top #setting-btn i {
+.main-top #setting-btn svg {
   margin-top: 4px;
-  color: var(--svg-color);
+  fill: var(--svg-color);
 }
 
-.main-top #userhome-btn i:hover,
-.main-top #setting-btn i:hover {
-  color: var(--hl-color);
-  color: var(--svg-hover-color);
+.main-top #userhome-btn svg:hover,
+.main-top #setting-btn svg:hover {
+  fill: var(--hl-color);
+  fill: var(--svg-hover-color);
 }
 </style>

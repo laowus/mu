@@ -5,9 +5,10 @@ import { Track } from "./common/Track";
 import { usePlayStore } from "./store/playStore";
 import { useAppCommonStore } from "./store/appCommonStore";
 import { storeToRefs } from "pinia";
-
+import { PLAY_STATE, TRAY_ACTION } from "./common/Constants";
+import { onMounted } from "vue";
 const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore());
-const { playNextTrack, setAutoPlaying, playTrackDirectly, isCurrentTrack, removeTrack, updateCurrentTime } = usePlayStore();
+const { playNextTrack, setAutoPlaying, playTrackDirectly, isCurrentTrack, removeTrack, updateCurrentTime, setPlaying } = usePlayStore();
 
 const { showFailToast } = useAppCommonStore();
 
@@ -110,6 +111,35 @@ EventBus.on("track-changed", (track) => {
 });
 EventBus.on("track-pos", (secs) => {
   updateCurrentTime(secs);
+});
+
+EventBus.on("track-state", (state) => {
+  switch (state) {
+    case PLAY_STATE.PLAYING:
+      setPlaying(true);
+      break;
+    case PLAY_STATE.PAUSE:
+      setPlaying(false);
+      break;
+    case PLAY_STATE.END:
+      playNextTrack();
+      break;
+    default:
+      break;
+  }
+});
+
+//应用启动时，恢复歌曲信息
+const restoreTrack = () => {
+  bootstrapTrack(currentTrack.value, true)
+    .then((track) => {
+      EventBus.emit("track-restore", track);
+    })
+    .catch((error) => console.log(error));
+};
+
+onMounted(() => {
+  restoreTrack();
 });
 </script>
 <template>

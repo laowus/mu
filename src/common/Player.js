@@ -173,9 +173,9 @@ export class Player {
     this.play(); // 然后再执行播放
   }
 
-  restore(track) {
-    this.setCurrent(track);
-    //this.createSound()
+  async restore(track) {
+    await this.setCurrent(track);
+    await this.createSound();
   }
 
   volume(value) {
@@ -183,6 +183,7 @@ export class Player {
   }
 
   seek(percent) {
+    console.log("seek", percent);
     const sound = this.getSound();
     if (!sound || !sound.playing()) return;
     sound.seek(sound.duration() * percent);

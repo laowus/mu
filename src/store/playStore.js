@@ -66,15 +66,29 @@ export const usePlayStore = defineStore("play", {
     setPlaying(value) {
       this.playing = value;
     },
+    togglePlay() {
+      console.log("togglePlay");
+      //播放列表为空
+      if (this.queueTracksSize < 1) return;
+      //当前歌曲不存在或存在但缺少url
+      if (!Track.hasUrl(this.currentTrack) || NO_TRACK == this.currentTrack) {
+        this.playNextTrack();
+        return;
+      }
+      //当前歌曲正常
+      EventBus.emit("track-togglePlay");
+    },
     //添加歌曲到播放队列
     addTrack(track) {
       const index = this.findIndex(track);
       if (index == -1) this.queueTracks.push(track);
     },
+
     addTracks(tracks) {
       if (tracks.length < 1) return;
       tracks.forEach((item) => this.addTrack(item));
     },
+
     __resetPlayState() {
       this.playing = false;
       this.currentTime = 0;
@@ -173,5 +187,15 @@ export const usePlayStore = defineStore("play", {
     setAutoPlaying(value) {
       this.isAutoPlaying = value;
     },
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: "player",
+        storage: localStorage,
+        paths: ["playingIndex", "playMode", "queueTracks", "volume"],
+      },
+    ],
   },
 });
