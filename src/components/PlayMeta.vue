@@ -13,12 +13,17 @@ const { currentTrack, mmssCurrentTime } = storeToRefs(usePlayStore());
 const props = defineProps({
   hideVolumeBar: Boolean,
 });
+const volumeBarRef = ref(null);
 
 const trackMeta = (track) => {
   let artistName = Track.artistName(track);
   if (artistName.length > 0) artistName = " - " + artistName;
   return track.title + artistName;
 };
+
+onMounted(() => {
+  if (volumeBarRef) volumeBarRef.value.setVolume(volume.value);
+});
 </script>
 
 <template>
@@ -35,6 +40,7 @@ const trackMeta = (track) => {
       </div>
       <div class="time-volume-wrap">
         <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
+        <VolumeBar class="volume-bar" ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>
       </div>
     </div>
   </div>

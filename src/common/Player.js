@@ -4,8 +4,6 @@ import EventBus from "../common/EventBus";
 import { Track } from "./Track";
 import { WebAudioApi } from "./WebAudioApi";
 import { fetch } from "@tauri-apps/plugin-http";
-import { readFile, writeFile, mkdir } from "@tauri-apps/plugin-fs";
-import { appCacheDir, join } from "@tauri-apps/api/path";
 
 let singleton = null;
 
@@ -16,6 +14,9 @@ export class Player {
     this.sound = null;
     this.retry = 0;
     this.webAudioApi = null;
+    // 在Player类中添加缓存属性
+    this.blobUrlCache = new Map();
+    this.cacheLimit = 20; //缓存最多20条记录
   }
 
   static get() {
@@ -27,13 +28,10 @@ export class Player {
   static initAndSetup() {
     const player = Player.get();
     return player
-      .on("track-play", (track) => player.playTrack(track))
       .on("suspend", () => player.pause())
+      .on("track-play", (track) => player.playTrack(track))
       .on("track-restore", (track) => player.restore(track))
-      .on("track-changed", () => {
-        console.log("Player.js=> track-changed");
-        player.setCurrent(null);
-      })
+      .on("track-changed", () => player.setCurrent(null))
       .on("track-togglePlay", () => player.togglePlay())
       .on("track-seek", (percent) => player.seek(percent))
       .on("volume-set", (volume) => player.volume(volume))
@@ -42,101 +40,97 @@ export class Player {
       .on("track-updateEQ", (values) => player.updateEQ(values));
   }
 
-  async loadAndPlayAudio() {
+  /**
+   * 将URL转换为Blob并创建Blob URL
+   * @param {string} url - 音频文件的URL
+   * @returns {Promise<string>} - 返回Blob URL
+   */
+  async urlToBlobUrl(url) {
+    // 如果缓存中存在URL，直接返回缓存的Blob URL
+    if (this.blobUrlCache.has(url)) {
+      return this.blobUrlCache.get(url);
+    }
+    // 如果缓存已满，删除最早添加的记录
+    if (this.blobUrlCache.size >= this.cacheLimit) {
+      const oldestUrl = this.blobUrlCache.keys().next().value; // 获取第一个添加的URL
+      const oldestBlobUrl = this.blobUrlCache.get(oldestUrl);
+      // 释放Blob URL资源
+      if (oldestBlobUrl && oldestBlobUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(oldestBlobUrl);
+      }
+      this.blobUrlCache.delete(oldestUrl);
+    }
     try {
-      // 创建缓存目录
-      const cacheDir = await join(await appCacheDir(), "audio_cache");
-      try {
-        await mkdir(cacheDir, { recursive: true });
-      } catch (e) {
-        // 目录可能已存在，忽略错误
-        console.log("Directory might already exist or error creating:", e);
+      const response = await fetch(url);
+      // 检查响应状态
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // 生成缓存文件名
-      const filename = `${this.currentTrack.id}.mp3`;
-      const filePath = await join(cacheDir, filename);
-
-      let audioData;
-      try {
-        // 尝试读取缓存文件
-        audioData = await readFile(filePath);
-      } catch (e) {
-        // 缓存不存在，下载文件
-        console.log("Cache miss, downloading:", this.currentTrack.url);
-        const response = await fetch(this.currentTrack.url);
-        const arrayBuffer = await response.arrayBuffer();
-        audioData = new Uint8Array(arrayBuffer);
-
-        // 写入缓存文件
-        await writeFile(filePath, audioData);
-      }
-
-      // 创建Blob URL
-      const blob = new Blob([audioData], { type: "audio/mpeg" });
+      const arrayBuffer = await response.arrayBuffer();
+      const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
       const blobUrl = URL.createObjectURL(blob);
-
-      // 定义self变量以在事件处理函数中使用
-      let self = this;
-
-      // 创建Howl实例
-      this.sound = new Howl({
-        src: [blobUrl],
-        html5: true,
-        autoplay: false,
-        preload: false,
-        crossOrigin: "anonymous",
-        onplay: function () {
-          self.retry = 0;
-          requestAnimationFrame(self.__step.bind(self));
-          self.notifyStateChanged(PLAY_STATE.PLAYING);
-        },
-        onpause: function () {
-          self.notifyStateChanged(PLAY_STATE.PAUSE);
-        },
-        onend: function () {
-          self.notifyStateChanged(PLAY_STATE.END);
-        },
-        onseek: function () {
-          requestAnimationFrame(self.__step.bind(self));
-        },
-        onloaderror: function () {
-          self.retryPlay(1);
-        },
-        onplayerror: function () {
-          self.retryPlay(1);
-        },
-      });
-      this.tryUnlockHowlAudios();
+      // 缓存Blob URL
+      this.blobUrlCache.set(url, blobUrl);
+      return blobUrl;
     } catch (error) {
-      console.error("Failed to load audio:", error);
-      this.retryPlay(1);
+      console.error("Failed to convert URL to Blob:", error);
+      throw error;
     }
   }
 
-  // 修改createSound方法以使用新的加载方式
-  createSound() {
+  async createSound() {
     if (!Track.hasUrl(this.currentTrack)) return null;
-    let self = this;
+    var self = this;
     //释放资源
     if (this.sound) this.sound.unload();
 
-    this.loadAndPlayAudio();
-    return null;
+    // 使用单独的函数将URL转换为Blob URL
+    const blobUrl = await this.urlToBlobUrl(this.currentTrack.url);
+
+    this.sound = new Howl({
+      src: [blobUrl],
+      html5: true,
+      autoplay: false,
+      preload: false,
+      crossOrigin: "anonymous",
+      onplay: function () {
+        this.retry = 0;
+        requestAnimationFrame(self.__step.bind(self));
+        self.notifyStateChanged(PLAY_STATE.PLAYING);
+      },
+      onpause: function () {
+        self.notifyStateChanged(PLAY_STATE.PAUSE);
+      },
+      onend: function () {
+        self.notifyStateChanged(PLAY_STATE.END);
+      },
+      onseek: function () {
+        requestAnimationFrame(self.__step.bind(self));
+      },
+      onloaderror: function () {
+        // 释放Blob URL
+        if (blobUrl && blobUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(blobUrl);
+        }
+        self.retryPlay(1);
+      },
+      onplayerror: function () {
+        self.retryPlay(1);
+      },
+    });
+    this.tryUnlockHowlAudios();
+    return this.sound;
   }
 
   getSound() {
     return Track.hasUrl(this.currentTrack) ? this.sound : null;
   }
 
-  // 修改play方法以适应异步加载
+  //播放
   play() {
-    // 如果sound还未加载完成，等待加载
-    if (!this.sound) {
-      setTimeout(() => this.play(), 100);
-      return;
-    }
-    this.sound.play();
+    let sound = this.getSound();
+    if (sound) sound.play();
   }
 
   //暂停
@@ -164,17 +158,19 @@ export class Player {
     if (sound) sound.stop();
   }
 
-  setCurrent(track) {
+  // 修改setCurrent方法为异步
+  async setCurrent(track) {
     console.log("setCurrent", track);
     this.stop();
     this.currentTrack = track;
-    this.createSound();
+    await this.createSound(); // 等待音频创建完成
   }
 
-  playTrack(track) {
+  // 修改playTrack方法为异步
+  async playTrack(track) {
     console.log("playTrack", track);
-    this.setCurrent(track);
-    this.play();
+    await this.setCurrent(track); // 等待setCurrent完成
+    this.play(); // 然后再执行播放
   }
 
   restore(track) {

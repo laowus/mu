@@ -80,19 +80,17 @@ export const usePlayStore = defineStore("play", {
       this.currentTime = 0;
       this.progress = 0.0;
     },
-    //直接播放，其他状态一概不管
+    __validPlayingIndex() {
+      const maxSize = this.queueTracksSize;
+      this.playingIndex = this.playingIndex > 0 ? this.playingIndex : 0;
+      this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : maxSize - 1;
+    },
     playTrackDirectly(track) {
-      // 开始去判断有没有url 没有就去获取url
-
       this.__resetPlayState();
       let playEventName = "track-play";
       if (!Track.hasUrl(track)) {
-        //去获取url
         playEventName = "track-changed";
       }
-      //第二次有了url 就直接播放
-      // player.on("track-play", track);
-      // 播放
       EventBus.emit(playEventName, track);
     },
     //添加歌曲到播放队列, 并播放
@@ -108,7 +106,58 @@ export const usePlayStore = defineStore("play", {
       this.playingIndex = index;
       this.playTrackDirectly(track);
     },
-
+    playNextTrack() {
+      const maxSize = this.queueTracksSize;
+      if (maxSize < 1) return;
+      switch (this.playMode) {
+        case PLAY_MODE.REPEAT_ALL:
+          this.playingIndex = ++this.playingIndex % maxSize;
+          break;
+        case PLAY_MODE.REPEAT_ONE:
+          break;
+        case PLAY_MODE.RANDOM:
+          this.playingIndex = Math.ceil(Math.random() * maxSize);
+          break;
+      }
+      this.__validPlayingIndex();
+      this.playTrackDirectly(this.currentTrack);
+    },
+    removeTrack(track) {
+      const index = this.findIndex(track);
+      if (index > -1) {
+        const isCurrent = index == this.playingIndex;
+        this.queueTracks.splice(index, 1);
+        if (index <= this.playingIndex) {
+          --this.playingIndex;
+        }
+        const maxSize = this.queueTracksSize;
+        if (maxSize < 1) {
+          this.resetQueue();
+          return;
+        }
+        if (isCurrent) {
+          if (this.playing) {
+            this.playNextTrack();
+          }
+        }
+      }
+    },
+    resetQueue() {
+      this.isAutoPlaying = false;
+      this.queueTracks.length = 0;
+      this.playingIndex = -1;
+      this.__resetPlayState();
+    },
+    updateCurrentTime(secs) {
+      this.currentTime = secs * 1000;
+      let duration = 0;
+      try {
+        duration = this.currentTrack.duration;
+      } catch (error) {
+        console.log(error);
+      }
+      this.progress = duration > 0 ? this.currentTime / duration : 0;
+    },
     updateVolume(value) {
       value = parseFloat(value);
       value = value > 0 ? value : 0;
