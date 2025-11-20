@@ -4,6 +4,8 @@ import EventBus from "../common/EventBus";
 export const useAppCommonStore = defineStore("appCommon", {
   state: () => ({
     coverMaskShow: false,
+    playbackQueueViewShow: false,
+    playingViewShow: false,
     //通用通知
     commonNotificationShow: false,
     commonNotificationText: null,
@@ -13,6 +15,18 @@ export const useAppCommonStore = defineStore("appCommon", {
   }),
   getters: {},
   actions: {
+    hidePlaybackQueueView() {
+      this.playbackQueueViewShow = false;
+    },
+    togglePlaybackQueueView() {
+      this.playbackQueueViewShow = !this.playbackQueueViewShow;
+    },
+    showPlayingView() {
+      this.playingViewShow = true;
+    },
+    hidePlayingView() {
+      this.playingViewShow = false;
+    },
     toggleCoverMask() {
       this.coverMaskShow = !this.coverMaskShow;
     },

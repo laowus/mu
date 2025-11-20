@@ -9,6 +9,7 @@ import SongItem from "./components/SongItem.vue";
 import PlayControl from "./components/PlayControl.vue";
 import ProgressBar from "./components/ProgressBar.vue";
 import SliderBar from "./components/SliderBar.vue";
+import PlaybackQueueView from "./views/PlaybackQueueView.vue";
 //Router
 import { router } from "./route/router";
 //LazyLoad
@@ -51,4 +52,5 @@ app
   .component("ImageTextTile", ImageTextTile)
   .component("SongItem", SongItem)
   .component("PlayControl", PlayControl)
+  .component("PlaybackQueueView", PlaybackQueueView)
   .mount("#app");

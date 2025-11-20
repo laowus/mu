@@ -1,20 +1,33 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import PlaybackQueueItem from "../components/PlaybackQueueItem.vue";
 import { usePlayStore } from "../store/playStore";
 import { useAppCommonStore } from "../store/appCommonStore";
-import EventBus from "../../common/EventBus";
+import EventBus from "../common/EventBus";
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore());
 const { resetQueue } = usePlayStore();
-const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useAppCommonStore();
+const { showToast, hidePlaybackQueueView, hidePlayingView } = useAppCommonStore();
 
-const pbqRef = ref(null), listRef = ref(null);
+const pbqRef = ref(null),
+  listRef = ref(null);
 
+const onQueueEmpty = () => {
+  showToast(
+    "播放列表已被清空！",
+    () => {
+      hidePlaybackQueueView();
+      hidePlayingView();
+    },
+    666,
+  );
+};
 
+EventBus.on("playbackQueue-empty", onQueueEmpty);
 </script>
 <template>
-  <div class="playback-queue-view" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
+  <div class="playback-queue-view" @click.stop="" ref="pbqRef">
     <div class="header">
       <div class="title">当前播放</div>
       <div class="detail">

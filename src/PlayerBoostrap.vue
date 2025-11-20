@@ -21,16 +21,17 @@ const TOO_FAST_MSG = "尝试播放次数太多<br>请手动播放其他歌曲吧
 const handleUnplayableTrack = (track) => {
   const queueSize = queueTracksSize.value;
   console.log("无法播放的歌曲:", track);
-  // 可以在这里添加处理逻辑，比如显示提示信息
+  // 从播放列表中删除无法播放的歌曲
+  removeTrack(track);
+
   //提示并播放下一曲
   const toastAndPlayNext = () => {
-    //前提条件：必须是当前歌曲
-    if (isCurrentTrack(track)) {
-      showFailToast(AUTO_PLAY_NEXT_MSG, () => {
-        if (isCurrentTrack(track)) playNextTrack();
-      });
-    }
+    //因为已经删除了歌曲，这里直接播放下一首
+    showFailToast(AUTO_PLAY_NEXT_MSG, () => {
+      playNextTrack();
+    });
   };
+  
   if (queueSize < 2) {
     //非电台歌曲，且没有下一曲
     showFailToast(NO_NEXT_MSG);
@@ -39,6 +40,7 @@ const handleUnplayableTrack = (track) => {
   //普通歌曲
   //频繁切换下一曲，体验不好，对音乐平台也不友好
   if (autoSkipCnt < 9) {
+    console.log("autoSkipCnt:", autoSkipCnt);
     ++autoSkipCnt;
     toastAndPlayNext();
     return;
@@ -74,7 +76,6 @@ const bootstrapTrack = (track) => {
     //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
     if (Track.hasUrl(result)) Object.assign(track, { url });
     if (!Track.hasUrl(track)) {
-      removeTrack(track);
       reject("noUrl");
       return;
     }

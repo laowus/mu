@@ -1,5 +1,4 @@
-// Tauri 2 语法的 main.rs 文件
-
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 fn main() {
     mu_lib::run();
 }

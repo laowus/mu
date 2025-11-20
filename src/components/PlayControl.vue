@@ -10,7 +10,7 @@ const { togglePlaybackQueueView, hideAllCategoryViews, hideAllCtxMenus } = useAp
 const togglePlaybackQueue = () => {
   //   hideAllCategoryViews();
   //   hideAllCtxMenus();
-  //   togglePlaybackQueueView();
+  togglePlaybackQueueView();
 };
 </script>
 
