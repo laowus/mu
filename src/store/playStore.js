@@ -183,7 +183,10 @@ export const usePlayStore = defineStore("play", {
       value = parseFloat(value);
       this.updateVolume(this.volume + value);
     },
-
+    switchPlayMode() {
+      this.playMode = ++this.playMode % 3;
+      //TODO
+    },
     setAutoPlaying(value) {
       this.isAutoPlaying = value;
     },

@@ -7,15 +7,13 @@ import PlaylistCategoryBar from "../components/PlaylistCategoryBar.vue";
 // 导入播放列表控制组件
 import PlaylistsControl from "../components/PlaylistsControl.vue";
 
-// 导入QQ音乐API模块
-import { QQ } from "../vendor/qq.js";
 // 导入事件总线，用于组件间通信
 import EventBus from "../common/EventBus.js";
 // 导入播放列表广场的状态管理store
 import { usePlaylistSquareStore } from "../store/playlistSquareStore";
 
 // 从store中解构出获取当前平台分类和存储分类的方法
-const { currentPlatformCategories, putCategories } = usePlaylistSquareStore();
+const { currentVender, currentPlatformCategories, putCategories } = usePlaylistSquareStore();
 const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore());
 
 const squareContentRef = ref(null);
@@ -71,8 +69,9 @@ const loadCategories = async () => {
 
   // 如果缓存不存在，则从网络获取数据，并缓存到本地
   if (!cachedCates) {
-    // 异步调用QQ音乐API获取分类数据
-    const result = await QQ.categories();
+    const vendor = currentVender();
+    if (!vendor || !vendor.categories) return;
+    const result = await vendor.categories();
 
     // 数据不存在则直接返回
     if (!result) return;
@@ -84,7 +83,7 @@ const loadCategories = async () => {
     if (!cachedCates) return;
 
     // 将获取到的分类数据缓存到store中
-    putCategories("qq", result.data);
+    putCategories(result.platform, result.data);
   }
 
   // 将分类数据添加到响应式数组中
@@ -108,6 +107,8 @@ const resetCommom = () => {
 };
 
 const loadContent = async (noLoadingMask) => {
+  const vendor = currentVender();
+  if (!vendor || !vendor.square) return;
   if (!noLoadingMask) setLoadingContent(true);
   //获取缓存的分类数据
   const cate = currentCategoryCode.value;
@@ -115,7 +116,8 @@ const loadContent = async (noLoadingMask) => {
   const limit = pagination.limit;
   const page = pagination.page;
   const order = currentOrder.value.value;
-  const result = await QQ.square(cate, offset, limit, page, order);
+
+  const result = await vendor.square(cate, offset, limit, page, order);
   if (!result) return;
   if (currentPlatformCode.value != result.platform) return;
   if (currentCategoryCode.value != result.cate) return;

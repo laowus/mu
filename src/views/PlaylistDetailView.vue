@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted, onActivated, reactive, ref, watch } from "vue";
-import { QQ } from "../vendor/qq.js";
 import SongListControl from "../components/SongListControl.vue";
+import { usePlatformStore } from '../store/platformStore'
 
+const { getVendor } = usePlatformStore();
 const props = defineProps({
   platform: String,
   id: String,
@@ -30,11 +31,14 @@ const updateListSizeText = () => {
 
 const loadContent = async (noLoadingMask) => {
   if (!noLoadingMask) setLoading(true);
+  const vendor = getVendor(props.platform);
+  if (!vendor || !vendor.playlistDetail) return;
+
   let maxRetry = 3,
     retry = 0,
     success = false;
   do {
-    const result = await QQ.playlistDetail(props.id, offset, limit, page);
+    const result = await vendor.playlistDetail(props.id, offset, limit, page);
     if (!result || result.data.length < 1) {
       ++retry;
       continue;

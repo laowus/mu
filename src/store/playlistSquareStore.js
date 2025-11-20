@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { usePlatformStore } from "./platformStore";
 
 export const usePlaylistSquareStore = defineStore("playlistSquare", {
   state: () => ({
@@ -18,7 +19,8 @@ export const usePlaylistSquareStore = defineStore("playlistSquare", {
   }),
   getters: {
     currentPlatformCode(state) {
-      return "qq";
+      const { currentPlatformCode } = usePlatformStore();
+      return currentPlatformCode;
     },
     //获取当前平台的分类项
     currentCategoryCode(state) {
@@ -30,13 +32,17 @@ export const usePlaylistSquareStore = defineStore("playlistSquare", {
       this.categoriesMap.set(key, value);
     },
     putCurrentPlatformCategories(value) {
-      this.putCategory("qq", value);
+      this.putCategory(this.currentPlatformCode, value);
     },
     getCategories(key) {
       return this.categoriesMap.get(key);
     },
     currentPlatformCategories() {
-      return this.getCategories("qq");
+      return this.getCategories(this.currentPlatformCode);
+    },
+    currentVender() {
+      const { currentVender } = usePlatformStore();
+      return currentVender();
     },
     updateCurrentCategoryItem(data, row, col) {
       this.currentCategoryItem.data = data;

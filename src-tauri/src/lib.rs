@@ -6,7 +6,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
-        .invoke_handler(tauri::generate_handler![http_client::http_get_json,])
+        .invoke_handler(tauri::generate_handler![
+            http_client::http_get_text,
+            http_client::http_post_text
+        ])
         .setup(setup::setup_app)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

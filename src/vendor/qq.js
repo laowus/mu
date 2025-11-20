@@ -151,7 +151,7 @@ export class QQ {
       };
 
       // 调用Tauri原生API获取QQ音乐分类数据
-      invoke("http_get_json", { url, header: QQ.header, reqBody })
+      invoke("http_get_text", { url, header: QQ.header, reqBody })
         .then((res) => {
           // 处理API返回的数据，确保是JSON对象
           const json = typeof res === "string" ? JSON.parse(res) : res;
@@ -219,7 +219,7 @@ export class QQ {
       }
       const url = "https://u.y.qq.com/cgi-bin/musicu.fcg";
       const reqBody = topListReqBody();
-      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((json) => {
+      invoke("http_get_text", { url, header: QQ.header, reqBody }).then((json) => {
         const groupList = json.req_1.data.group;
         groupList.forEach((group) => {
           group.toplist.forEach((item) => {
@@ -263,7 +263,7 @@ export class QQ {
         sin: offset,
         ein: offset + limit - 1,
       };
-      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+      invoke("http_get_text", { url, header: QQ.header, reqBody }).then((res) => {
         // 处理API返回的数据，确保是JSON对象
         const json = typeof res === "string" ? JSON.parse(res) : res;
         result.total = Math.ceil(json.data.sum / limit);
@@ -296,7 +296,7 @@ export class QQ {
         disstid: id, // 歌单的id
         loginUin: 0,
       };
-      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+      invoke("http_get_text", { url, header: QQ.header, reqBody }).then((res) => {
         const json = typeof res === "string" ? JSON.parse(res) : res;
         const playlist = json.cdlist[0];
         result.id = id;
@@ -335,7 +335,7 @@ export class QQ {
           }),
         }),
       };
-      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+      invoke("http_get_text", { url, header: QQ.header, reqBody }).then((res) => {
         const json = typeof res === "string" ? JSON.parse(res) : res;
         const trackInfo = json.songinfo.data.track_info;
         QQ.getVKeyJson(trackInfo).then((json) => {
@@ -357,7 +357,7 @@ export class QQ {
     return new Promise((resolve, reject) => {
       let url = "https://u.y.qq.com/cgi-bin/musicu.fcg";
       const reqBody = vkeyReqBody(trackInfo);
-      invoke("http_get_json", { url, header: QQ.header, reqBody }).then((res) => {
+      invoke("http_get_text", { url, header: QQ.header, reqBody }).then((res) => {
         const json = typeof res === "string" ? JSON.parse(res) : res;
         resolve(json);
       });

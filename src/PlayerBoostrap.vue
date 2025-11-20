@@ -1,14 +1,15 @@
 <script setup>
 import EventBus from "./common/EventBus";
-import { QQ } from "./vendor/qq.js";
 import { Track } from "./common/Track";
 import { usePlayStore } from "./store/playStore";
 import { useAppCommonStore } from "./store/appCommonStore";
+import { usePlatformStore } from "./store/platformStore";
 import { storeToRefs } from "pinia";
 import { PLAY_STATE, TRAY_ACTION } from "./common/Constants";
 import { onMounted } from "vue";
 const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore());
 const { playNextTrack, setAutoPlaying, playTrackDirectly, isCurrentTrack, removeTrack, updateCurrentTime, setPlaying } = usePlayStore();
+const { getVendor } = usePlatformStore();
 
 const { showFailToast } = useAppCommonStore();
 
@@ -31,7 +32,7 @@ const handleUnplayableTrack = (track) => {
       playNextTrack();
     });
   };
-  
+
   if (queueSize < 2) {
     //非电台歌曲，且没有下一曲
     showFailToast(NO_NEXT_MSG);
@@ -70,8 +71,13 @@ const bootstrapTrack = (track) => {
       return;
     }
     const { id, platform, artistNotCompleted } = track;
-    //播放相关数据
-    const result = await QQ.playDetail(id, track);
+    //平台服务
+    const vendor = getVendor(platform);
+    if (!vendor || !vendor.playDetail) {
+      reject();
+      return;
+    }
+    const result = await vendor.playDetail(id, track);
     const { lyric, cover, artist, url } = result;
     //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
     if (Track.hasUrl(result)) Object.assign(track, { url });
