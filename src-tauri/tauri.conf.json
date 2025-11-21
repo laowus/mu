@@ -5,14 +5,14 @@
   "identifier": "com.laowus.mu",
   "build": {
     "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:3000",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "mu",
+        "title": "mu 音乐盒",
         "width": 1080,
         "height": 600,
         "decorations": false,
