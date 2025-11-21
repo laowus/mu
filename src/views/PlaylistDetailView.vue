@@ -1,13 +1,15 @@
 <script setup>
 import { onMounted, onActivated, reactive, ref, watch } from "vue";
 import SongListControl from "../components/SongListControl.vue";
-import { usePlatformStore } from '../store/platformStore'
+import { usePlatformStore } from "../store/platformStore";
 
 const { getVendor } = usePlatformStore();
 const props = defineProps({
   platform: String,
   id: String,
 });
+
+console.log("PlaylistDetailView.vue", props);
 
 const detail = reactive({});
 const listSizeText = ref("0");

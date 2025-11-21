@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from "pinia";
 // 导入Vue相关的响应式API和生命周期钩子
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 // 导入播放列表分类栏组件
 import PlaylistCategoryBar from "../components/PlaylistCategoryBar.vue";
 // 导入播放列表控制组件
@@ -132,6 +132,13 @@ const refreshData = () => {
   resetCommom();
   loadContent();
 };
+
+/* 生命周期、监听 */
+watch(currentPlatformCode, (nv, ov) => {
+  if (!nv) return;
+  resetCommom();
+  loadCategories();
+});
 
 // 监听播放列表刷新事件
 EventBus.on("playlistSquare-refresh", refreshData);

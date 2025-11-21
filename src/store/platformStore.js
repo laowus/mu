@@ -78,7 +78,7 @@ const vendors = {
 export const usePlatformStore = defineStore("platform", {
   //State
   state: () => ({
-    currentPlatformIndex: 1,
+    currentPlatformIndex: 0,
     vendors,
   }),
   //Getters

@@ -6,7 +6,26 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "shell:allow-open",
+    "shell:allow-spawn",
+    "os:default",
+    "core:path:default",
+    "process:default",
+    "process:allow-exit",
+    "process:allow-restart",
     "fs:default",
+    "core:window:allow-maximize",
+    "core:window:allow-minimize",
+    "core:window:allow-close",
+    "core:window:allow-unmaximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-center",
+    "core:window:allow-set-size",
+    "core:window:allow-set-focus",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-destroy",
     {
       "identifier": "http:default",
       "allow": [
@@ -15,6 +34,18 @@
         },
         {
           "url": "http://*.qq.com/**"
+        },
+        {
+          "url": "https://*.163.com/**"
+        },
+        {
+          "url": "http://*.163.com/**"
+        },
+        {
+          "url": "http://*.126.net/**"
+        },
+        {
+          "url": "https://*.126.net/**"
         }
       ]
     },

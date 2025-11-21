@@ -160,15 +160,12 @@ export class NetEase {
 
   //歌单详情
   static playlistDetail(id, offset, limit, page) {
-    console.log("歌单详情:", id, offset, limit, page);
     // if (id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) return NetEase.anchorRadioDetail(id, offset, limit, page);
     return new Promise((resolve, reject) => {
       const result = new Playlist();
       let url = "https://music.163.com/weapi/v3/playlist/detail";
       let param = playlistParam(id);
       let reqBody = weapi(param);
-
-      console.log("歌单详情:", reqBody);
 
       invoke("http_post_text", { url, header: NetEase.header, reqBody }).then((res) => {
         const json = typeof res === "string" ? JSON.parse(res) : res;
@@ -199,6 +196,31 @@ export class NetEase {
             track.pid = id;
             result.addTrack(track);
           });
+          resolve(result);
+        });
+      });
+    });
+  }
+
+  static resolveAnchorRadio(id, track) {
+    return new Promise((resolve, reject) => {
+      if (id.startsWith(NetEase.RADIO_PREFIX)) id = track.songlistId;
+      resolve(id);
+    });
+  }
+
+  //歌曲播放详情：url、cover、lyric等
+  static playDetail(id, track) {
+    return new Promise((resolve, reject) => {
+      NetEase.resolveAnchorRadio(id, track).then((resolvedId) => {
+        const url = "https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=";
+        const param = playParam(resolvedId);
+        const reqBody = weapi(param);
+        invoke("http_post_text", { url, header: NetEase.header, reqBody }).then((res) => {
+          const json = typeof res === "string" ? JSON.parse(res) : res;
+          const result = new Track(id);
+          const song = json.data[0];
+          result.url = song.url;
           resolve(result);
         });
       });
