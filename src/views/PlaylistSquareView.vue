@@ -1,12 +1,12 @@
 <script setup>
 import { storeToRefs } from "pinia";
 // 导入Vue相关的响应式API和生命周期钩子
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch, onActivated } from "vue";
 // 导入播放列表分类栏组件
 import PlaylistCategoryBar from "../components/PlaylistCategoryBar.vue";
 // 导入播放列表控制组件
 import PlaylistsControl from "../components/PlaylistsControl.vue";
-
+import Back2TopBtn from "../components/Back2TopBtn.vue";
 // 导入事件总线，用于组件间通信
 import EventBus from "../common/EventBus.js";
 // 导入播放列表广场的状态管理store
@@ -104,6 +104,7 @@ onMounted(() => {
 const resetCommom = () => {
   resetPagination();
   resetScrollState();
+  resetBack2TopBtn();
 };
 
 const loadContent = async (noLoadingMask) => {
@@ -133,6 +134,50 @@ const refreshData = () => {
   loadContent();
 };
 
+const markScrollState = () => {
+  if (squareContentRef.value) markScrollTop = squareContentRef.value.scrollTop;
+};
+
+const nextPage = () => {
+  pagination.offset = pagination.page * pagination.limit;
+  pagination.page = pagination.page + 1;
+};
+
+const loadMoreContent = () => {
+  nextPage();
+  loadContent(true);
+};
+
+const scrollToLoad = () => {
+  if (isLoadingContent.value) return;
+  const scrollTop = squareContentRef.value.scrollTop;
+  const scrollHeight = squareContentRef.value.scrollHeight;
+  const clientHeight = squareContentRef.value.clientHeight;
+  markScrollState();
+  const allowedError = 10; //允许误差
+  if (scrollTop + clientHeight + allowedError >= scrollHeight) {
+    loadMoreContent();
+  }
+};
+
+const onScroll = () => {
+  scrollToLoad();
+};
+
+const restoreScrollState = () => {
+  EventBus.emit("imageTextTile-load");
+  if (markScrollTop < 1) return;
+  if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop;
+};
+
+const resetBack2TopBtn = () => {
+  if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value);
+};
+
+onActivated(() => {
+  restoreScrollState();
+});
+
 /* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
   if (!nv) return;
@@ -146,9 +191,9 @@ EventBus.on("playlistSquare-refresh", refreshData);
 
 <template>
   <!-- 播放列表广场视图容器 -->
-  <div class="playlist-square-view" ref="squareContentRef">
+  <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
     <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories"></PlaylistCategoryBar>
-    <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
+    <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl> <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
   </div>
 </template>
 

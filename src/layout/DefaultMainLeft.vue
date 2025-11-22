@@ -10,7 +10,7 @@ let isUserMouseWheel = ref(false),
   userMouseWheelCancelTimer = null;
 
 const { platforms, currentPlatformIndex, currentPlatformCode } = storeToRefs(usePlatformStore());
-const { updateCurrentPlatform } = usePlatformStore();
+const { updateCurrentPlatform, isLocalMusic } = usePlatformStore();
 
 const onUserMouseWheel = () => {
   isUserMouseWheel.value = true;
@@ -28,7 +28,9 @@ const updatePlatformIndex = (index) => {
   const platform = currentPlatformCode.value;
   let path = null;
   path = `/playlists/square/${platform}`;
-  console.log("path", path);
+  if (isLocalMusic(platform)) {
+    path = `/${platform}`;
+  }
   visitRoute(path);
 };
 </script>

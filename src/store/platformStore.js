@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { QQ } from "../vendor/qq";
 import { NetEase } from "../vendor/netease";
+import { KuGou } from "../vendor/kugou";
+import { LocalMusic } from "../vendor/localmusic";
 
 //weight权重，范围：1 - 10
 const T_TYPES = [
@@ -64,14 +66,30 @@ const ALL_PLATFORMS = [
     types: ["playlists", "artists", "albums", "anchorRadios"],
     weight: 8,
   },
+  {
+    code: KuGou.CODE,
+    name: "酷狗音乐",
+    shortName: "KG",
+    online: true,
+    types: ["playlists", "artists", "albums"],
+    weight: 8,
+  },
+  {
+    code: LocalMusic.CODE,
+    name: "本地歌曲",
+    shortName: "LO",
+    online: false,
+    types: null,
+  },
 ];
 
-const radioCount = 3;
 const playlistPlatforms = ALL_PLATFORMS.slice(1);
 
 const vendors = {
   qq: QQ,
   netease: NetEase,
+  kugou: KuGou,
+  local: LocalMusic,
 };
 
 //平台相关Store
@@ -152,6 +170,10 @@ export const usePlatformStore = defineStore("platform", {
     },
     isFMRadioType(type) {
       return type === "fmRadios";
+    },
+    isLocalMusic(platform) {
+      if (!this.isPlatformValid(platform)) return false;
+      return platform.trim() == LocalMusic.CODE;
     },
     getPlatformName(platform) {
       const result = ALL_PLATFORMS.filter((item) => item.code == platform);

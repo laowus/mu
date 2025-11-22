@@ -25,6 +25,11 @@ const routes = [
     props: true,
     component: SearchView,
   },
+  {
+    //本地歌曲
+    path: "/local",
+    component: LocalMusicView,
+  },
 ];
 
 export const router = createRouter({
