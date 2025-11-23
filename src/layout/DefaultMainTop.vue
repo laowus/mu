@@ -28,11 +28,10 @@ watch(progress, (nv, ov) => {
         <PlayControl></PlayControl>
       </div>
       <div class="top-right">
-        <SearchBar></SearchBar>
         <div id="userhome-btn" @click="">
           <i class="iconfont icon-touxiang f24px"></i>
         </div>
-        <div id="setting-btn" @click="">
+        <div id="setting-btn" @click="visitSetting">
           <i class="iconfont icon-shezhi f24px"></i>
         </div>
         <Navigator></Navigator>

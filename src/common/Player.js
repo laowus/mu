@@ -4,6 +4,7 @@ import EventBus from "../common/EventBus";
 import { Track } from "./Track";
 import { WebAudioApi } from "./WebAudioApi";
 import { fetch } from "@tauri-apps/plugin-http";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 let singleton = null;
 
@@ -40,53 +41,35 @@ export class Player {
       .on("track-updateEQ", (values) => player.updateEQ(values));
   }
 
-  /**
-   * 将URL转换为Blob并创建Blob URL
-   * @param {string} url - 音频文件的URL
-   * @returns {Promise<string>} - 返回Blob URL
-   */
-  async urlToBlobUrl(url) {
-    // 如果缓存中存在URL，直接返回缓存的Blob URL
-    if (this.blobUrlCache.has(url)) {
-      return this.blobUrlCache.get(url);
-    }
-    // 如果缓存已满，删除最早添加的记录
-    if (this.blobUrlCache.size >= this.cacheLimit) {
-      const oldestUrl = this.blobUrlCache.keys().next().value; // 获取第一个添加的URL
-      const oldestBlobUrl = this.blobUrlCache.get(oldestUrl);
-      // 释放Blob URL资源
-      if (oldestBlobUrl && oldestBlobUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(oldestBlobUrl);
-      }
-      this.blobUrlCache.delete(oldestUrl);
-    }
+  async urlToBlobUrl(track) {
+    const url = track.url;
     try {
-      const response = await fetch(url);
-      // 检查响应状态
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (track.platform === "local") {
+        return convertFileSrc(url);
+      } else {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
+        const blobUrl = URL.createObjectURL(blob);
+        return blobUrl;
       }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-      const blobUrl = URL.createObjectURL(blob);
-      // 缓存Blob URL
-      this.blobUrlCache.set(url, blobUrl);
-      return blobUrl;
     } catch (error) {
       console.error("Failed to convert URL to Blob:", error);
       throw error;
     }
   }
 
-  async createSound() {
+  async createSound() {  
     if (!Track.hasUrl(this.currentTrack)) return null;
     var self = this;
     //释放资源
     if (this.sound) this.sound.unload();
 
     // 使用单独的函数将URL转换为Blob URL
-    const blobUrl = await this.urlToBlobUrl(this.currentTrack.url);
+    const blobUrl = await this.urlToBlobUrl(this.currentTrack);
 
     this.sound = new Howl({
       src: [blobUrl],

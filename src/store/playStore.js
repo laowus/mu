@@ -120,6 +120,23 @@ export const usePlayStore = defineStore("play", {
       this.playingIndex = index;
       this.playTrackDirectly(track);
     },
+    playPrevTrack() {
+      //TODO
+      const maxSize = this.queueTracksSize;
+      if (maxSize < 1) return;
+      switch (this.playMode) {
+        case PLAY_MODE.REPEAT_ALL:
+          --this.playingIndex;
+          this.playingIndex = this.playingIndex < 0 ? maxSize - 1 : this.playingIndex;
+          break;
+        case PLAY_MODE.REPEAT_ONE:
+          break;
+        case PLAY_MODE.RANDOM:
+          break;
+      }
+      this.__validPlayingIndex();
+      this.playTrackDirectly(this.currentTrack);
+    },
     playNextTrack() {
       const maxSize = this.queueTracksSize;
       if (maxSize < 1) return;

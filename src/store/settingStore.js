@@ -34,10 +34,14 @@ export const useSettingStore = defineStore("setting", {
       this.theme.index = index || 0;
       this.theme.type = type || 0;
     },
+    presetThemes() {
+      const { getPresetThemes } = useThemeStore();
+      return getPresetThemes();
+    },
     getCurrentThemeId() {
       const { getTheme } = useThemeStore();
       const { type, index } = this.theme;
       return getTheme(type, index).id;
     },
-  }
+  },
 });

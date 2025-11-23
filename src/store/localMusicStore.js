@@ -4,6 +4,7 @@ import { join, appDataDir } from "@tauri-apps/api/path";
 import { readDir } from "@tauri-apps/plugin-fs";
 import { invoke } from "@tauri-apps/api/core";
 import { Track } from "../common/Track";
+import CryptoJS from "crypto-js";
 
 export const useLocalMusicStore = defineStore("localMusic", {
   state: () => ({
@@ -18,9 +19,7 @@ export const useLocalMusicStore = defineStore("localMusic", {
   },
   actions: {
     async addFolders() {
-      console.log("添加本地文件夹");
       this.isLoading = true;
-      // 打开一个文件夹选择框
       const selected = await openDialog({
         title: "选择音乐文件夹",
         multiple: false,
@@ -29,16 +28,13 @@ export const useLocalMusicStore = defineStore("localMusic", {
 
       if (!selected) {
         this.isLoading = false;
-        return; // 用户取消了选择
+        return;
       }
 
       try {
-        // 检查是否已添加此文件夹
         if (!this.localDirs.includes(selected)) {
           this.localDirs.push(selected);
         }
-
-        // 获取文件夹中的音频文件
         await this.scanAudioFiles(selected);
       } catch (error) {
         console.error("扫描音频文件失败:", error);
@@ -61,27 +57,24 @@ export const useLocalMusicStore = defineStore("localMusic", {
         for (const entry of entries) {
           const fullPath = await join(directory, entry.name);
           if (entry.isDirectory) {
-            // 递归处理子目录
             await this.scanAudioFiles(fullPath);
           } else if (entry.isFile) {
             const fileName = entry.name;
             const fileExt = fileName.split(".").pop()?.toLowerCase();
             if (fileExt && audioExtensions.includes(fileExt)) {
-              console.log("完整文件路径:", fullPath);
-
               const metadata = await this.getAudioMetadata(fullPath);
-              console.log("metadata", metadata);
               if (metadata) {
-                // 使用元数据创建Track对象
-                const track = new Track({
-                  id: fullPath,
-                  name: metadata.title !== "未知标题" ? metadata.title : fileName,
-                  artist: metadata.artist,
-                  album: metadata.album,
-                  duration: metadata.duration,
-                  url: fullPath,
-                  source: "local",
-                });
+                console.log("metadata", metadata);
+                const hash = CryptoJS.MD5(metadata.title + metadata.duration).toString();
+                const coverData = metadata.cover_data ? `data:${metadata.cover_mime_type};base64,${metadata.cover_data}` : "default_cover.png";
+
+                const artistObj = metadata.artist && metadata.artist !== "未知艺术家" ? [{ id: "", name: metadata.artist }] : [];
+
+                // 处理专辑格式 - 将字符串转换为对象
+                const albumObj = metadata.album && metadata.album !== "未知专辑" ? { id: "", name: metadata.album } : { id: "", name: "" };
+
+                const track = new Track(hash, "local", metadata.title !== "未知标题" ? metadata.title : fileName, artistObj, albumObj, metadata.duration, coverData, fullPath);
+                console.log("track", track);
 
                 if (!this.localTracks.some((t) => t.id === track.id)) {
                   this.localTracks.push(track);
@@ -100,5 +93,14 @@ export const useLocalMusicStore = defineStore("localMusic", {
       this.localDirs.length = 0;
       this.localTracks.length = 0;
     },
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        storage: localStorage,
+        paths: ["localDirs", "localTracks"],
+      },
+    ],
   },
 });

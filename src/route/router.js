@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import PlaylistSquareView from "../views/PlaylistSquareView.vue";
 import PlaylistDetailView from "../views/PlaylistDetailView.vue";
-import SearchView from "../views/SearchView.vue";
+import SettingView from "../views/SettingView.vue";
 import LocalMusicView from "../views/LocalMusicView.vue";
 const routes = [
   {
@@ -20,11 +20,11 @@ const routes = [
     props: true,
     component: PlaylistDetailView,
   },
+
   {
-    //搜索
-    path: "/search/:keyword",
-    props: true,
-    component: SearchView,
+    //设置
+    path: "/setting",
+    component: SettingView,
   },
   {
     //本地歌曲

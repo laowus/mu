@@ -13,7 +13,7 @@ import Back2TopBtn from "../components/Back2TopBtn.vue";
 import { useAppCommonStore } from "../store/appCommonStore";
 import { useLocalMusicStore } from "../store/localMusicStore";
 import PlayAddAllBtn from "../components/PlayAddAllBtn.vue";
-import SongListControl from '../components/SongListControl.vue';
+import SongListControl from "../components/SongListControl.vue";
 const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore());
 const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore();
 const { showToast } = useAppCommonStore();
@@ -41,8 +41,6 @@ const addAll = (text) => {};
         <div class="title">本地歌曲</div>
         <div class="about">
           <p>目前支持的音频格式有：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
-          <p>最近播放功能，暂时不支持记录本地歌曲</p>
-          <p>此功能仅供试用体验，暂时还没有完善~</p>
         </div>
         <div class="action">
           <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>

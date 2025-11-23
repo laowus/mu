@@ -21,7 +21,7 @@ const togglePlaybackQueue = () => {
       <i v-show="playMode == 1" class="iconfont icon-danquxunhuan"></i>
       <i v-show="playMode == 2" class="iconfont icon-random"></i>
     </div>
-    <div class="play-prev-btn spacing" @click="">
+    <div class="play-prev-btn spacing" @click="playPrevTrack">
       <i class="iconfont icon-shangyishoushangyige"></i>
     </div>
     <div class="play-btn spacing" @click="togglePlay">

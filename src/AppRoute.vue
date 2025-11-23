@@ -46,6 +46,7 @@ provide("appRoute", {
   },
   backward: () => router.back(),
   forward: () => router.forward(),
+  visitSetting: () => visitRoute("/setting"),
 });
 </script>
 <template>
