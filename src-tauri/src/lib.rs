@@ -1,3 +1,4 @@
+mod audio_metadata;
 mod http_client;
 mod setup;
 
@@ -80,7 +81,8 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             http_client::http_get_text,
-            http_client::http_post_text
+            http_client::http_post_text,
+            audio_metadata::get_audio_metadata,
         ]);
     // 仅在桌面环境下初始化窗口状态插件（用于保存和恢复窗口状态）
     #[cfg(desktop)]

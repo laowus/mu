@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import PlaylistSquareView from "../views/PlaylistSquareView.vue";
 import PlaylistDetailView from "../views/PlaylistDetailView.vue";
 import SearchView from "../views/SearchView.vue";
+import LocalMusicView from "../views/LocalMusicView.vue";
 const routes = [
   {
     //默认

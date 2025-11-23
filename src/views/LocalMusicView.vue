@@ -8,9 +8,14 @@ export default {
 <script setup>
 import { inject, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
+import AddFolderFileBtn from "../components/AddFolderFileBtn.vue";
 import Back2TopBtn from "../components/Back2TopBtn.vue";
 import { useAppCommonStore } from "../store/appCommonStore";
-
+import { useLocalMusicStore } from "../store/localMusicStore";
+import PlayAddAllBtn from "../components/PlayAddAllBtn.vue";
+import SongListControl from '../components/SongListControl.vue';
+const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore());
+const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore();
 const { showToast } = useAppCommonStore();
 
 const localMusicRef = ref(null);
@@ -20,6 +25,10 @@ const resetBack2TopBtn = () => {
   back2TopBtnRef.value.setScrollTarget(localMusicRef.value);
 };
 onMounted(resetBack2TopBtn);
+
+const playAll = () => {};
+
+const addAll = (text) => {};
 </script>
 
 <template>
@@ -35,6 +44,17 @@ onMounted(resetBack2TopBtn);
           <p>最近播放功能，暂时不支持记录本地歌曲</p>
           <p>此功能仅供试用体验，暂时还没有完善~</p>
         </div>
+        <div class="action">
+          <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>
+          <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
+        </div>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="list-title">歌曲({{ localTracks.length }})</div>
+      <div class="songlist">
+        <SongListControl :data="localTracks" :artistVisiable="false" :albumVisiable="false" :deleteFn="removeItem" :dataType="1"> </SongListControl>
       </div>
     </div>
     <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
