@@ -2,6 +2,9 @@
 import { onMounted, onActivated, reactive, ref, watch } from "vue";
 import SongListControl from "../components/SongListControl.vue";
 import { usePlatformStore } from "../store/platformStore";
+import PlayAddAllBtn from "../components/PlayAddAllBtn.vue";
+import { usePlayStore } from "../store/playStore";
+import EventBus from "../common/EventBus";
 
 const { getVendor } = usePlatformStore();
 const props = defineProps({
@@ -9,12 +12,13 @@ const props = defineProps({
   id: String,
 });
 
-console.log("PlaylistDetailView.vue", props);
+const { addTracks } = usePlayStore();
 
 const detail = reactive({});
 const listSizeText = ref("0");
 const playlistDetailRef = ref(null);
 const back2TopBtnRef = ref(null);
+
 let offset = 0,
   page = 1,
   limit = 1000;
@@ -76,6 +80,12 @@ const trimExtraHtml = (text) => {
   //TODO 暂时不处理html空白格式信息
   return text;
 };
+
+const playAll = () => EventBus.emit("playlist-play", { playlist: detail });
+const addAll = (text) => {
+  addTracks(detail.data);
+  showToast(text || "歌曲已全部添加！");
+};
 </script>
 <template>
   <div id="playlist-detail-view" ref="playlistDetailRef">
@@ -86,6 +96,9 @@ const trimExtraHtml = (text) => {
       <div class="right" v-show="!isLoading">
         <div class="title" v-html="detail.title"></div>
         <div class="about" v-html="trimExtraHtml(detail.about)"></div>
+        <div class="action">
+          <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" class="btn-spacing"> </PlayAddAllBtn>
+        </div>
       </div>
       <div class="right" v-show="isLoading">
         <div class="title">

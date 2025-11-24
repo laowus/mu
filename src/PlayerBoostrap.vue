@@ -7,11 +7,12 @@ import { usePlatformStore } from "./store/platformStore";
 import { storeToRefs } from "pinia";
 import { PLAY_STATE, TRAY_ACTION } from "./common/Constants";
 import { onMounted } from "vue";
+import { Playlist } from "./common/Playlist";
 const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore());
-const { playNextTrack, setAutoPlaying, playTrackDirectly, isCurrentTrack, removeTrack, updateCurrentTime, setPlaying } = usePlayStore();
+const { playNextTrack, setAutoPlaying, playTrackDirectly, isCurrentTrack, removeTrack, updateCurrentTime, setPlaying, addTracks, resetQueue } = usePlayStore();
 const { getVendor } = usePlatformStore();
 
-const { showFailToast } = useAppCommonStore();
+const { showFailToast, isCurrentTraceId, togglePlaybackQueueView, showToast } = useAppCommonStore();
 
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = "当前歌曲无法播放<br>即将为您播放下一曲";
@@ -50,11 +51,51 @@ const handleUnplayableTrack = (track) => {
   resetAutoSkip();
   showFailToast(TOO_FAST_MSG);
 };
+//歌单
+
+//添加到播放列表，并开始播放
+const addAndPlayTracks = (tracks, needReset, text, traceId) => {
+  if (traceId && !isCurrentTraceId(traceId)) return;
+
+  if (needReset) resetQueue();
+  showToast(text || "即将为您播放全部！");
+  addTracks(tracks);
+  playNextTrack();
+};
+
+//播放歌单
+const playPlaylist = async (playlist, text, traceId) => {
+  if (traceId && !isCurrentTraceId(traceId)) return;
+
+  const { id, platform } = playlist;
+  if (Playlist.isNormalType(playlist) || Playlist.isAnchorRadioType(playlist)) {
+    let maxRetry = 3,
+      retry = 0;
+    while (!playlist.data || playlist.data.length < 1) {
+      if (traceId && !isCurrentTraceId(traceId)) return;
+
+      if (++retry > maxRetry) return;
+      //重试一次加载数据
+      const vendor = getVendor(platform);
+      if (!vendor || !vendor.playlistDetail) return;
+      playlist = await vendor.playlistDetail(id, 0, 1000, 1);
+    }
+  }
+  if (!playlist.data || playlist.data.length < 1) {
+    const failMsg = Playlist.isCustomType(playlist) ? "歌单里还没有歌曲" : "网络异常！请稍候重试";
+    if (traceId && !isCurrentTraceId(traceId)) return;
+    showFailToast(failMsg);
+    return;
+  }
+  //可播放歌单
+  addAndPlayTracks(playlist.data, true, text || "即将为您播放歌单", traceId);
+};
 
 /* 播放歌单 */
 const tryPlayPlaylist = async (playlist, text, traceId) => {
+  console.log("tryPlayPlaylist", playlist, text, traceId);  
   try {
-    //playPlaylist(playlist, text, traceId);
+    playPlaylist(playlist, text, traceId);
   } catch (error) {
     console.log(error);
     //if (traceId && !isCurrentTraceId(traceId)) return;

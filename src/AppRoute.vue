@@ -2,15 +2,35 @@
 import { provide } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import { usePlatformStore } from "./store/platformStore";
+const { updateCurrentPlatformByCode } = usePlatformStore();
 
 /* 全局Router设置  */
 const router = useRouter();
+const setupRouter = () => {
+  router.beforeResolve((to, from) => {
+    console.log("[ ROUTE ] ==>>> " + to.path);
+    highlightPlatform(to);
+  });
+};
+
+const highlightPlatform = (to) => {
+  const path = to.path;
+  let platform = "";
+  if (path.includes("/square") || path.includes("/playlist") || path.includes("/artist") || path.includes("/album")) {
+    platform = path.split("/")[3];
+  } else if (path.includes("/local")) {
+    platform = "local";
+  }
+  updateCurrentPlatformByCode(platform);
+};
+
 const currentRoutePath = () => router.currentRoute.value.path;
 const resolveRoute = (route) => {
   if (typeof route == "object") return route;
   return { toPath: route.toString() };
 };
-//TODO Reject是否需要实现待考虑
+
 const visitRoute = (route) => {
   console.log("visitRoute", route);
   return new Promise((resolve, reject) => {
@@ -19,7 +39,6 @@ const visitRoute = (route) => {
       return;
     }
     const { toPath, onRouteReady, beforeRoute } = resolveRoute(route);
-    console.log("visitRoute toPath", toPath, beforeRoute);
     if (!toPath) {
       //if(reject) reject()
       return;
@@ -38,6 +57,8 @@ const visitRoute = (route) => {
     if (resolve) resolve();
   });
 };
+
+setupRouter();
 
 provide("appRoute", {
   visitRoute,

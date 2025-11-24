@@ -180,6 +180,7 @@ onActivated(() => {
 
 /* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
+  console.log("PlaylistSquareView watch currentPlatformCode", nv, ov);
   if (!nv) return;
   resetCommom();
   loadCategories();

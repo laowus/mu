@@ -2,6 +2,7 @@
 import { inject } from "vue";
 import PaginationTiles from "./PaginationTiles.vue";
 import ImageTextTileLoadingMask from "./ImageTextTileLoadingMask.vue";
+import EventBus from "../common/EventBus";
 const props = defineProps({
   data: Array,
   loading: Boolean,

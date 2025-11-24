@@ -12,8 +12,10 @@ import AddFolderFileBtn from "../components/AddFolderFileBtn.vue";
 import Back2TopBtn from "../components/Back2TopBtn.vue";
 import { useAppCommonStore } from "../store/appCommonStore";
 import { useLocalMusicStore } from "../store/localMusicStore";
+import { usePlayStore } from "../store/playStore";
 import PlayAddAllBtn from "../components/PlayAddAllBtn.vue";
 import SongListControl from "../components/SongListControl.vue";
+const { addTracks, resetQueue, playNextTrack } = usePlayStore();
 const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore());
 const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore();
 const { showToast } = useAppCommonStore();
@@ -25,10 +27,21 @@ const resetBack2TopBtn = () => {
   back2TopBtnRef.value.setScrollTarget(localMusicRef.value);
 };
 onMounted(resetBack2TopBtn);
+const noTracks = () => localTracks.value.length < 1;
+const playAll = () => {
+  if (noTracks()) return;
+  resetQueue();
+  addAll("即将为您播放全部！");
+  playNextTrack();
+};
 
-const playAll = () => {};
+const addAll = (text) => {
+  if (noTracks()) return;
+  addTracks(localTracks.value);
+  showToast(text || "歌曲已全部添加！");
+};
 
-const addAll = (text) => {};
+onMounted(resetBack2TopBtn);
 </script>
 
 <template>

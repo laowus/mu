@@ -6,6 +6,7 @@ import { useAppCommonStore } from "../store/appCommonStore";
 import EventBus from "../common/EventBus";
 import WindowCtr from "../components/WindowCtr.vue";
 
+const activeCustomPlaylistIndex = ref(-1);
 let isUserMouseWheel = ref(false),
   userMouseWheelCancelTimer = null;
 
@@ -33,6 +34,8 @@ const updatePlatformIndex = (index) => {
   }
   visitRoute(path);
 };
+
+
 </script>
 <template>
   <div id="main-left" :class="{ mousewheelViewpoint: isUserMouseWheel }">

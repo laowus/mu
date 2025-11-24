@@ -1,11 +1,11 @@
 <script setup>
-const excludes = ["LocalMusicView", "CustomPlaylistEditView", "UserInfoEditView", "BatchActionView", "DataBackupView", "DataRestoreView"];
+const excludes = ["LocalMusicView"];
 </script>
 
 <template>
   <div id="main-content">
     <router-view v-slot="{ Component }">
-      <keep-alive :max="12">
+      <keep-alive :max="12" :exclude="excludes">
         <component :is="Component" />
       </keep-alive>
     </router-view>

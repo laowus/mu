@@ -62,7 +62,7 @@ export class Player {
     }
   }
 
-  async createSound() {  
+  async createSound() {
     if (!Track.hasUrl(this.currentTrack)) return null;
     var self = this;
     //释放资源
@@ -158,7 +158,7 @@ export class Player {
 
   async restore(track) {
     await this.setCurrent(track);
-    await this.createSound();
+    //this.play();
   }
 
   volume(value) {

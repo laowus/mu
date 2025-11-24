@@ -282,10 +282,6 @@ export class QQ {
 
   //歌单详情
   static playlistDetail(id, offset, limit, page) {
-    // if (id.startsWith(QQ.TOPLIST_PREFIX)) {
-    //   return QQ.toplistDetail(id, offset, limit, page);
-    // }
-
     return new Promise((resolve, reject) => {
       const result = new Playlist();
       const url = "http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg";
@@ -297,6 +293,7 @@ export class QQ {
         loginUin: 0,
       };
       invoke("http_get_text", { url, header: QQ.header, reqBody }).then((res) => {
+        console.log(res);
         const json = typeof res === "string" ? JSON.parse(res) : res;
         const playlist = json.cdlist[0];
         result.id = id;

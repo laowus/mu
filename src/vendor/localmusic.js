@@ -7,9 +7,9 @@ export class LocalMusic {
   static playDetail(id, track) {
     return new Promise((resolve, reject) => {
       let url = track.url;
-      if (!url.includes(FILE_PREFIX)) {
-        track.url = FILE_PREFIX + url;
-      }
+      // if (!url.includes(FILE_PREFIX)) {
+      //   track.url = FILE_PREFIX + url;
+      // }
       resolve(track);
     });
   }

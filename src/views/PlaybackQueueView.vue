@@ -18,13 +18,26 @@ const onQueueEmpty = () => {
     "播放列表已被清空！",
     () => {
       hidePlaybackQueueView();
-      hidePlayingView();
     },
     666,
   );
 };
 
 EventBus.on("playbackQueue-empty", onQueueEmpty);
+
+const targetPlaying = () => {
+  if (queueTracksSize < 1) return;
+  const queueItemsWrap = document.querySelector(".playback-queue-view .center");
+  const clientHeight = queueItemsWrap.clientHeight;
+  const scrollHeight = queueItemsWrap.scrollHeight;
+  const maxScroll = scrollHeight - clientHeight;
+  queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1));
+};
+
+const clearAll = () => {
+  resetQueue();
+  onQueueEmpty();
+};
 </script>
 <template>
   <div class="playback-queue-view" @click.stop="" ref="pbqRef">
@@ -32,7 +45,14 @@ EventBus.on("playbackQueue-empty", onQueueEmpty);
       <div class="title">当前播放</div>
       <div class="detail">
         <div class="subtext">共{{ queueTracks.length }}首</div>
-        <div class="action"></div>
+        <div class="action">
+          <div class="target-btn text-btn" @click="targetPlaying">
+            <span><i class="iconfont icon-Location"></i> 定位</span>
+          </div>
+          <div class="clear-btn text-btn" @click="clearAll">
+            <span><i class="iconfont icon-shanchu"></i> 清空</span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="center" ref="listRef">
