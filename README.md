@@ -8,10 +8,20 @@ Tauri2 + vue3 技术栈
 
 播放网络音乐，支持 mp3、flac、ogg、wav、aac、m4a 等格式。
 
+
+
 ## 代码参考
 前端参考:
 electron 项目 ：https://github.com/GeekLee2012/Less-Player-Desktop
 
+
+## 显示图
+
+![image](./snapshot/01.jpg)
+![image](./snapshot/02.jpg)
+![image](./snapshot/03.jpg)
+![image](./snapshot/04.jpg)
+![image](./snapshot/05.jpg)
 
 ## 安装
 
