@@ -1,7 +1,6 @@
 mod audio_metadata;
 mod http_client;
 mod setup;
-
 // 仅在桌面环境下导入的模块和类型
 #[cfg(desktop)]
 use std::path::PathBuf; // 用于处理文件路径的标准库类型
@@ -87,6 +86,8 @@ pub fn run() {
     // 仅在桌面环境下初始化窗口状态插件（用于保存和恢复窗口状态）
     #[cfg(desktop)]
     let builder = builder.plugin(tauri_plugin_window_state::Builder::default().build());
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
 
     #[cfg(desktop)]
     let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {

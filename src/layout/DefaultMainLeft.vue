@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { usePlatformStore } from "../store/platformStore";
 import { useAppCommonStore } from "../store/appCommonStore";
@@ -35,7 +35,12 @@ const updatePlatformIndex = (index) => {
   visitRoute(path);
 };
 
-
+watch(
+  () => currentPlatformIndex.value,
+  (newIndex) => {
+    console.log("currentPlatformIndex", newIndex);
+  },
+);
 </script>
 <template>
   <div id="main-left" :class="{ mousewheelViewpoint: isUserMouseWheel }">

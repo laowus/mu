@@ -17,8 +17,12 @@ const setupRouter = () => {
 const highlightPlatform = (to) => {
   const path = to.path;
   let platform = "";
-  if (path.includes("/square") || path.includes("/playlist") || path.includes("/artist") || path.includes("/album")) {
+  if (path.includes("/square/")) {
+    ///eg:playlists/square/qq
     platform = path.split("/")[3];
+  } else if (path.includes("/playlist/")) {
+    ///eg:playlist/qq/123456
+    platform = path.split("/")[2];
   } else if (path.includes("/local")) {
     platform = "local";
   }

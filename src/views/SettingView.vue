@@ -1,10 +1,16 @@
 <script setup>
 import { inject, onActivated, onMounted, ref, toRaw, watch } from "vue";
+import { invoke } from "@tauri-apps/api/core";
 import { useSettingStore } from "../store/settingStore";
 import { storeToRefs } from "pinia";
 
 const { presetThemes, setThemeIndex } = useSettingStore();
 const { theme } = storeToRefs(useSettingStore());
+
+async function checkForUpdates() {
+  const response = await invoke("check_for_updates"); // 调用 Tauri 的命令来检查更新
+  console.log(response); // 处理响应，例如显示通知给用户等。
+}
 </script>
 
 <template>
@@ -18,6 +24,16 @@ const { theme } = storeToRefs(useSettingStore());
         <div class="content">
           <div class="last" v-for="(item, index) in presetThemes()" :class="{ active: index == theme.index, lightText: item.dark }" :style="{ background: item.color }" @click="setThemeIndex(index)">
             <span>{{ item.name }}</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="row">
+          <span class="cate-name"><b>检查更新</b></span>
+          <div class="content">
+            <div class="last" @click="checkForUpdates">
+              <span>检查更新</span>
+            </div>
           </div>
         </div>
       </div>

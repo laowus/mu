@@ -41,5 +41,13 @@
         "language": "zh-CN"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": ["https://api.github.com/repos/laowus/mu/releases/latest"],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM4NzZGOTFBQ0U0QjNEQTcKUldTblBVdk9HdmwyeU9WK2hzdzV3NC9rcG96c3BrN1BwK0EwZ2c5RTBRekJKV3paZWl3bU9IQjMK"
+    }
   }
 }
